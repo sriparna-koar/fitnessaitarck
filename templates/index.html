@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .workout-item, .goal-item {
+            border-left: 4px solid #0d6efd;
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        .sentiment-positive {
+            color: #28a745;
+        }
+        .sentiment-negative {
+            color: #dc3545;
+        }
+        .sentiment-neutral {
+            color: #6c757d;
+        }
+        #recommendations {
+            white-space: pre-line;
+        }
+        #fileAnalysis {
+            white-space: pre-line;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+         .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .search-result-item:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center"><i class="bi bi-activity"></i> Fitness Tracker</h1>
+            </div>
+        </div>
+   <div class="row mb-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="search-container">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="userSearch" placeholder="Search users by ID or name...">
+                        <button class="btn btn-primary" id="searchUserBtn">Search</button>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- User Profile Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">User Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="userForm">
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">User ID</label>
+                                <input type="text" class="form-control" id="userId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="userName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="userName" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="userAge" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="userAge" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="userWeight" class="form-label">Weight (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" id="userWeight" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="userHeight" class="form-label">Height (cm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="userHeight" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="userFitnessLevel" class="form-label">Fitness Level</label>
+                                    <select class="form-select" id="userFitnessLevel" required>
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Save Profile</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="quickStats">
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="totalWorkouts">0</div>
+                                    <div class="stat-label">Workouts</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="totalCalories">0</div>
+                                    <div class="stat-label">Calories</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="activeGoals">0</div>
+                                    <div class="stat-label">Active Goals</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="completedGoals">0</div>
+                                    <div class="stat-label">Completed Goals</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Section -->
+            <div class="col-md-8">
+                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="workouts-tab" data-bs-toggle="tab" data-bs-target="#workouts" type="button" role="tab">Workouts</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab">Goals</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai" type="button" role="tab">AI Features</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">Analytics</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="mainTabsContent">
+                    <!-- Workouts Tab -->
+                    <div class="tab-pane fade show active" id="workouts" role="tabpanel">
+                        <div class="mb-4">
+                            <h5>Log New Workout</h5>
+                            <form id="workoutForm">
+                                <input type="hidden" id="workoutUserId">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutType" class="form-label">Type</label>
+                                        <select class="form-select" id="workoutType" required>
+                                            <option value="Running">Running</option>
+                                            <option value="Cycling">Cycling</option>
+                                            <option value="Swimming">Swimming</option>
+                                            <option value="Weight Training">Weight Training</option>
+                                            <option value="Yoga">Yoga</option>
+                                            <option value="HIIT">HIIT</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutDuration" class="form-label">Duration (min)</label>
+                                        <input type="number" class="form-control" id="workoutDuration" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutCalories" class="form-label">Calories</label>
+                                        <input type="number" class="form-control" id="workoutCalories" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workoutIntensity" class="form-label">Intensity</label>
+                                        <select class="form-select" id="workoutIntensity" required>
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workoutNotes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="workoutNotes" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Log Workout</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h5>Recent Workouts</h5>
+                            <div id="workoutsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Goals Tab -->
+                    <div class="tab-pane fade" id="goals" role="tabpanel">
+                        <div class="mb-4">
+                            <h5>Set New Goal</h5>
+                            <form id="goalForm">
+                                <input type="hidden" id="goalUserId">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="goalType" class="form-label">Goal Type</label>
+                                        <select class="form-select" id="goalType" required>
+                                            <option value="Weight Loss">Weight Loss</option>
+                                            <option value="Muscle Gain">Muscle Gain</option>
+                                            <option value="Endurance">Endurance</option>
+                                            <option value="Flexibility">Flexibility</option>
+                                            <option value="Workout Frequency">Workout Frequency</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="goalTargetValue" class="form-label">Target Value</label>
+                                        <input type="number" step="0.1" class="form-control" id="goalTargetValue" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="goalTargetDate" class="form-label">Target Date</label>
+                                    <input type="date" class="form-control" id="goalTargetDate" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Set Goal</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h5>Your Goals</h5>
+                            <div id="goalsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI Features Tab -->
+                    <div class="tab-pane fade" id="ai" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Workout Recommendations</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Get personalized workout recommendations based on your profile and history.</p>
+                                        <button id="getRecommendationsBtn" class="btn btn-primary mb-3">Get Recommendations</button>
+                                        <div id="recommendations" class="p-2 bg-light rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">AI Chat</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="aiPrompt" class="form-label">Ask about fitness, nutrition, or health:</label>
+                                            <textarea class="form-control" id="aiPrompt" rows="2" placeholder="E.g., What's a good meal plan for muscle gain?"></textarea>
+                                        </div>
+                                        <button id="askAiBtn" class="btn btn-primary mb-3">Ask AI</button>
+                                        <div id="aiResponse" class="p-2 bg-light rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Meal Plan Generator</h5>
+                            </div>
+                            <div class="card-body">
+                                <button id="generateMealPlanBtn" class="btn btn-primary mb-3">Generate Personalized Meal Plan</button>
+                                <div id="mealPlan" class="p-2 bg-light rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Tab -->
+                    <div class="tab-pane fade" id="analytics" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Workout Analytics</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="analyticsPeriod" class="form-label">Time Period</label>
+                                    <select class="form-select" id="analyticsPeriod">
+                                        <option value="week">Last Week</option>
+                                        <option value="month" selected>Last Month</option>
+                                        <option value="year">Last Year</option>
+                                    </select>
+                                </div>
+                                <button id="loadAnalyticsBtn" class="btn btn-primary mb-3">Load Analytics</button>
+                                <div id="workoutAnalytics"></div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Data Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="fileUpload" class="form-label">Upload fitness data (CSV, JSON, Excel)</label>
+                                    <input class="form-control" type="file" id="fileUpload" accept=".csv,.json,.xlsx,.xls">
+                                </div>
+                                <button id="analyzeFileBtn" class="btn btn-primary mb-3">Analyze File</button>
+                                <div id="fileAnalysis" class="p-2 bg-light rounded"></div>
+                            </div>
+                        </div>
+
+                   
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Progress Modal -->
+    <div class="modal fade" id="goalProgressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Goal Progress</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="goalProgressForm">
+                        <input type="hidden" id="progressGoalId">
+                        <div class="mb-3">
+                            <label for="currentProgress" class="form-label">Current Progress</label>
+                            <input type="number" step="0.1" class="form-control" id="currentProgress" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // DOM Ready
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     // Initialize modals
+        //     goalProgressModal = new bootstrap.Modal(document.getElementById('goalProgressModal'));
+
+        //     // Initialize event listeners
+        //     document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+        //     document.getElementById('workoutForm').addEventListener('submit', handleWorkoutSubmit);
+        //     document.getElementById('goalForm').addEventListener('submit', handleGoalSubmit);
+        //     document.getElementById('goalProgressForm').addEventListener('submit', handleGoalProgressUpdate);
+        //     document.getElementById('getRecommendationsBtn').addEventListener('click', getRecommendations);
+        //     document.getElementById('askAiBtn').addEventListener('click', askAI);
+        //     document.getElementById('analyzeFileBtn').addEventListener('click', analyzeFile);
+        //     document.getElementById('loadAnalyticsBtn').addEventListener('click', loadWorkoutAnalytics);
+        //     document.getElementById('generateMealPlanBtn').addEventListener('click', generateMealPlan);
+        //     document.getElementById('exportJson').addEventListener('click', () => exportData('json'));
+        //     document.getElementById('exportCsv').addEventListener('click', () => exportData('csv'));
+        //     document.getElementById('exportExcel').addEventListener('click', () => exportData('excel'));
+
+        //     // Add search event listeners
+        //     document.getElementById('searchUserBtn').addEventListener('click', searchUsers);
+        //     document.getElementById('userSearch').addEventListener('keyup', function(e) {
+        //         if (e.key === 'Enter') {
+        //             searchUsers();
+        //         }
+        //     });
+
+        //     // Check for existing user in localStorage
+        //     const savedUserId = localStorage.getItem('fitnessTrackerUserId');
+        //     if (savedUserId) {
+        //         loadUserData(savedUserId);
+        //     }
+        // });
+// DOM Ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modals
+    goalProgressModal = new bootstrap.Modal(document.getElementById('goalProgressModal'));
+
+    // Initialize event listeners
+    document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+    document.getElementById('workoutForm').addEventListener('submit', handleWorkoutSubmit);
+    document.getElementById('goalForm').addEventListener('submit', handleGoalSubmit);
+    document.getElementById('goalProgressForm').addEventListener('submit', handleGoalProgressUpdate);
+    document.getElementById('getRecommendationsBtn').addEventListener('click', getRecommendations);
+    document.getElementById('askAiBtn').addEventListener('click', askAI);
+    document.getElementById('analyzeFileBtn').addEventListener('click', analyzeFile);
+    document.getElementById('loadAnalyticsBtn').addEventListener('click', loadWorkoutAnalytics);
+    document.getElementById('generateMealPlanBtn').addEventListener('click', generateMealPlan);
+    
+    // Only add export event listeners if the elements exist
+    const exportJsonBtn = document.getElementById('exportJson');
+    const exportCsvBtn = document.getElementById('exportCsv');
+    const exportExcelBtn = document.getElementById('exportExcel');
+    
+    if (exportJsonBtn) exportJsonBtn.addEventListener('click', () => exportData('json'));
+    if (exportCsvBtn) exportCsvBtn.addEventListener('click', () => exportData('csv'));
+    if (exportExcelBtn) exportExcelBtn.addEventListener('click', () => exportData('excel'));
+
+    // Add search event listeners
+    document.getElementById('searchUserBtn').addEventListener('click', searchUsers);
+    document.getElementById('userSearch').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            searchUsers();
+        }
+    });
+
+    // Check for existing user in localStorage
+    const savedUserId = localStorage.getItem('fitnessTrackerUserId');
+    if (savedUserId) {
+        loadUserData(savedUserId);
+    }
+});
+        // Add these new functions for user search
+        async function searchUsers() {
+            const searchTerm = document.getElementById('userSearch').value.trim();
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/search?q=${encodeURIComponent(searchTerm)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to search users');
+                }
+
+                const users = await response.json();
+                displaySearchResults(users);
+            } catch (error) {
+                console.error('Error searching users:', error);
+                document.getElementById('searchResults').innerHTML = '<div class="search-result-item">Error searching users</div>';
+                document.getElementById('searchResults').style.display = 'block';
+            }
+        }
+
+        function displaySearchResults(users) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+
+            if (users.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-result-item">No users found</div>';
+                resultsContainer.style.display = 'block';
+                return;
+            }
+
+            users.forEach(user => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.textContent = `${user.name} (ID: ${user.user_id})`;
+                resultItem.addEventListener('click', () => {
+                    loadUserData(user.user_id);
+                    resultsContainer.style.display = 'none';
+                    document.getElementById('userSearch').value = '';
+                });
+                resultsContainer.appendChild(resultItem);
+            });
+
+            resultsContainer.style.display = 'block';
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+
+        // Modify the loadUserData function to handle the "user not found" case
+        async function loadUserData(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}/stats`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        alert('User not found');
+                        return;
+                    }
+                    throw new Error('Failed to load user data');
+                }
+
+                const data = await response.json();
+
+                // Update quick stats
+                document.getElementById('totalWorkouts').textContent = data.total_workouts;
+                document.getElementById('totalCalories').textContent = data.total_calories;
+                document.getElementById('activeGoals').textContent = data.active_goals;
+                document.getElementById('completedGoals').textContent = data.completed_goals;
+
+                // Populate user form
+                const user = data.user_info;
+                document.getElementById('userId').value = user.user_id;
+                document.getElementById('userName').value = user.name;
+                document.getElementById('userAge').value = user.age;
+                document.getElementById('userWeight').value = user.weight;
+                document.getElementById('userHeight').value = user.height;
+                document.getElementById('userFitnessLevel').value = user.fitness_level;
+                document.getElementById('workoutUserId').value = user.user_id;
+                document.getElementById('goalUserId').value = user.user_id;
+
+                // Render workouts list
+                renderWorkouts(data.workouts);
+
+                // Render goals list
+                renderGoals(data.goals);
+
+                currentUserId = userId;
+                localStorage.setItem('fitnessTrackerUserId', userId);
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                alert('Error loading user data: ' + error.message);
+            }
+        }
+
+        // Rest of your existing JavaScript remains the same
+    </script>
+    <script>
+        // Global variables
+        let currentUserId = null;
+        let workoutChart = null;
+        let goalProgressModal = null;
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modals
+            goalProgressModal = new bootstrap.Modal(document.getElementById('goalProgressModal'));
+
+            // Initialize event listeners
+            document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+            document.getElementById('workoutForm').addEventListener('submit', handleWorkoutSubmit);
+            document.getElementById('goalForm').addEventListener('submit', handleGoalSubmit);
+            document.getElementById('goalProgressForm').addEventListener('submit', handleGoalProgressUpdate);
+            document.getElementById('getRecommendationsBtn').addEventListener('click', getRecommendations);
+            document.getElementById('askAiBtn').addEventListener('click', askAI);
+            document.getElementById('analyzeFileBtn').addEventListener('click', analyzeFile);
+            document.getElementById('loadAnalyticsBtn').addEventListener('click', loadWorkoutAnalytics);
+            document.getElementById('generateMealPlanBtn').addEventListener('click', generateMealPlan);
+            document.getElementById('exportJson').addEventListener('click', () => exportData('json'));
+            document.getElementById('exportCsv').addEventListener('click', () => exportData('csv'));
+            document.getElementById('exportExcel').addEventListener('click', () => exportData('excel'));
+
+            // Check for existing user in localStorage
+            const savedUserId = localStorage.getItem('fitnessTrackerUserId');
+            if (savedUserId) {
+                loadUserData(savedUserId);
+            }
+        });
+
+        // Handle User Form Submission
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
+            const age = document.getElementById('userAge').value;
+            const weight = document.getElementById('userWeight').value;
+            const height = document.getElementById('userHeight').value;
+            const fitnessLevel = document.getElementById('userFitnessLevel').value;
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        name: name,
+                        age: age,
+                        weight: weight,
+                        height: height,
+                        fitness_level: fitnessLevel
+                    })
+                });
+
+                if (response.ok) {
+                    alert('User profile saved successfully!');
+                    currentUserId = userId;
+                    localStorage.setItem('fitnessTrackerUserId', userId);
+                    document.getElementById('workoutUserId').value = userId;
+                    document.getElementById('goalUserId').value = userId;
+                    loadUserData(userId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to save user profile');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        // Handle Workout Form Submission
+        async function handleWorkoutSubmit(e) {
+            e.preventDefault();
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const form = e.target;
+            form.classList.add('loading');
+
+            const workoutType = document.getElementById('workoutType').value;
+            const duration = document.getElementById('workoutDuration').value;
+            const calories = document.getElementById('workoutCalories').value;
+            const intensity = document.getElementById('workoutIntensity').value;
+            const notes = document.getElementById('workoutNotes').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/workouts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workout_type: workoutType,
+                        duration: duration,
+                        calories: calories,
+                        intensity: intensity,
+                        notes: notes
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Workout logged successfully!');
+                    if (result.sentiment) {
+                        alert(`Workout sentiment: ${result.sentiment.toLowerCase()}`);
+                    }
+                    form.reset();
+                    loadUserData(currentUserId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to log workout');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            } finally {
+                form.classList.remove('loading');
+            }
+        }
+
+        // Handle Goal Form Submission
+        async function handleGoalSubmit(e) {
+            e.preventDefault();
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const form = e.target;
+            form.classList.add('loading');
+
+            const goalType = document.getElementById('goalType').value;
+            const targetValue = document.getElementById('goalTargetValue').value;
+            const targetDate = document.getElementById('goalTargetDate').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/goals`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        goal_type: goalType,
+                        target_value: targetValue,
+                        target_date: targetDate
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Goal set successfully!');
+                    form.reset();
+                    loadUserData(currentUserId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to set goal');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            } finally {
+                form.classList.remove('loading');
+            }
+        }
+
+        // Handle Goal Progress Update
+        async function handleGoalProgressUpdate(e) {
+            e.preventDefault();
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const form = e.target;
+            form.classList.add('loading');
+
+            const goalId = document.getElementById('progressGoalId').value;
+            const currentValue = document.getElementById('currentProgress').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/goals/${goalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_value: currentValue
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Goal progress updated successfully!');
+                    goalProgressModal.hide();
+                    loadUserData(currentUserId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update goal progress');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            } finally {
+                form.classList.remove('loading');
+            }
+        }
+
+        // Load User Data and Stats
+        async function loadUserData(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}/stats`);
+                if (!response.ok) {
+                    throw new Error('Failed to load user data');
+                }
+
+                const data = await response.json();
+
+                // Update quick stats
+                document.getElementById('totalWorkouts').textContent = data.total_workouts;
+                document.getElementById('totalCalories').textContent = data.total_calories;
+                document.getElementById('activeGoals').textContent = data.active_goals;
+                document.getElementById('completedGoals').textContent = data.completed_goals;
+
+                // Populate user form
+                const user = data.user_info;
+                document.getElementById('userId').value = user.user_id;
+                document.getElementById('userName').value = user.name;
+                document.getElementById('userAge').value = user.age;
+                document.getElementById('userWeight').value = user.weight;
+                document.getElementById('userHeight').value = user.height;
+                document.getElementById('userFitnessLevel').value = user.fitness_level;
+                document.getElementById('workoutUserId').value = user.user_id;
+                document.getElementById('goalUserId').value = user.user_id;
+
+                // Render workouts list
+                renderWorkouts(data.workouts);
+
+                // Render goals list
+                renderGoals(data.goals);
+
+                currentUserId = userId;
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Render Workouts List
+        function renderWorkouts(workouts) {
+            const container = document.getElementById('workoutsList');
+            container.innerHTML = '';
+
+            if (workouts.length === 0) {
+                container.innerHTML = '<p>No workouts logged yet.</p>';
+                return;
+            }
+
+            workouts.forEach(workout => {
+                const workoutEl = document.createElement('div');
+                workoutEl.className = 'workout-item';
+                
+                const workoutDate = new Date(workout.timestamp);
+                const formattedDate = workoutDate.toLocaleDateString() + ' ' + workoutDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                workoutEl.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <h6>${workout.workout_type} (${workout.duration} min)</h6>
+                        <small class="text-muted">${formattedDate}</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="badge bg-${workout.intensity.toLowerCase() === 'high' ? 'danger' : workout.intensity.toLowerCase() === 'medium' ? 'warning' : 'success'}">
+                                ${workout.intensity}
+                            </span>
+                            <span>${workout.calories} calories</span>
+                        </div>
+                        ${workout.notes ? `<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#notes-${workout.id}">Notes</button>` : ''}
+                    </div>
+                    ${workout.notes ? `
+                    <div class="collapse mt-2" id="notes-${workout.id}">
+                        <div class="card card-body">
+                            ${workout.notes}
+                            ${workout.sentiment ? `<div class="mt-2 sentiment-${workout.sentiment.toLowerCase()}">
+                                <i class="bi bi-emoji-${workout.sentiment === 'POSITIVE' ? 'smile' : workout.sentiment === 'NEGATIVE' ? 'frown' : 'neutral'}"></i>
+                                ${workout.sentiment.toLowerCase()} mood
+                            </div>` : ''}
+                        </div>
+                    </div>` : ''}
+                `;
+                container.appendChild(workoutEl);
+            });
+        }
+
+        // Render Goals List
+        function renderGoals(goals) {
+            const container = document.getElementById('goalsList');
+            container.innerHTML = '';
+
+            if (goals.length === 0) {
+                container.innerHTML = '<p>No goals set yet.</p>';
+                return;
+            }
+
+            goals.forEach(goal => {
+                const progress = (goal.current_value / goal.target_value) * 100;
+                const goalEl = document.createElement('div');
+                goalEl.className = 'goal-item mb-3';
+                
+                const targetDate = new Date(goal.target_date);
+                const formattedDate = targetDate.toLocaleDateString();
+                
+                goalEl.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <h6>${goal.goal_type}</h6>
+                        <small class="text-muted">Target: ${formattedDate}</small>
+                    </div>
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: ${Math.min(progress, 100)}%;" 
+                            aria-valuenow="${goal.current_value}" aria-valuemin="0" aria-valuemax="${goal.target_value}">
+                            ${Math.round(progress)}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>${goal.current_value} of ${goal.target_value}</span>
+                        <div>
+                            <span class="badge bg-${goal.completed ? 'success' : 'primary'}">
+                                ${goal.completed ? 'Completed' : 'Active'}
+                            </span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="showGoalProgressModal(${goal.id}, ${goal.current_value})">
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(goalEl);
+            });
+        }
+
+        // Show Goal Progress Modal
+        function showGoalProgressModal(goalId, currentValue) {
+            document.getElementById('progressGoalId').value = goalId;
+            document.getElementById('currentProgress').value = currentValue;
+            goalProgressModal.show();
+        }
+
+        // Get Workout Recommendations
+        async function getRecommendations() {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const btn = document.getElementById('getRecommendationsBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/recommendations`);
+                if (!response.ok) {
+                    throw new Error('Failed to get recommendations');
+                }
+
+                const data = await response.json();
+                document.getElementById('recommendations').innerHTML = data.recommendation || 'No recommendations available';
+            } catch (error) {
+                document.getElementById('recommendations').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Generate Meal Plan
+        async function generateMealPlan() {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const btn = document.getElementById('generateMealPlanBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/meal-plan`);
+                if (!response.ok) {
+                    throw new Error('Failed to generate meal plan');
+                }
+
+                const data = await response.json();
+                document.getElementById('mealPlan').innerHTML = data.meal_plan || 'No meal plan generated';
+            } catch (error) {
+                document.getElementById('mealPlan').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Ask AI Question
+        async function askAI() {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const btn = document.getElementById('askAiBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/ai/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('aiResponse').innerHTML = data.response || 'No response from AI';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to get AI response');
+                }
+            } catch (error) {
+                document.getElementById('aiResponse').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Load Workout Analytics
+        async function loadWorkoutAnalytics() {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const btn = document.getElementById('loadAnalyticsBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const period = document.getElementById('analyticsPeriod').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/analytics?period=${period}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load analytics');
+                }
+
+                const data = await response.json();
+                renderWorkoutAnalytics(data);
+            } catch (error) {
+                document.getElementById('workoutAnalytics').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                console.error('Error:', error);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Render Workout Analytics
+        function renderWorkoutAnalytics(data) {
+            const container = document.getElementById('workoutAnalytics');
+            container.innerHTML = '';
+
+            if (!data || (!data.by_type && !data.trends && !data.intensity)) {
+                container.innerHTML = '<p>No analytics data available</p>';
+                return;
+            }
+
+            // Workout by type chart
+            if (data.by_type && data.by_type.length > 0) {
+                const typeChartEl = document.createElement('div');
+                typeChartEl.innerHTML = '<h6>Workouts by Type</h6><canvas id="typeChart" height="200"></canvas>';
+                container.appendChild(typeChartEl);
+
+                const typeCtx = document.getElementById('typeChart').getContext('2d');
+                
+                if (workoutChart) {
+                    workoutChart.destroy();
+                }
+
+                workoutChart = new Chart(typeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.by_type.map(item => item.workout_type),
+                        datasets: [{
+                            label: 'Number of Workouts',
+                            data: data.by_type.map(item => item.count),
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Workout trends
+            if (data.trends && data.trends.length > 0) {
+                const trendsEl = document.createElement('div');
+                trendsEl.className = 'mt-4';
+                trendsEl.innerHTML = `
+                    <h6>Workout Trends</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Workouts</th>
+                                    <th>Total Duration</th>
+                                    <th>Total Calories</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.trends.map(trend => `
+                                    <tr>
+                                        <td>${trend.period}</td>
+                                        <td>${trend.count}</td>
+                                        <td>${trend.total_duration} min</td>
+                                        <td>${trend.total_calories}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(trendsEl);
+            }
+// Intensity distribution
+if (data.intensity && data.intensity.length > 0) {
+    const intensityEl = document.createElement('div');
+    intensityEl.className = 'mt-4';
+    intensityEl.innerHTML = `
+        <h6>Intensity Distribution</h6>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Intensity</th>
+                        <th>Workouts</th>
+                        <th>Avg Duration</th>
+                        <th>Avg Calories</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.intensity.map(item => `
+                        <tr>
+                            <td>${item.intensity}</td>
+                            <td>${item.count}</td>
+                            <td>${typeof item.avg_duration === 'number' ? item.avg_duration.toFixed(1) + ' min' : 'N/A'}</td>
+                            <td>${typeof item.avg_calories === 'number' ? item.avg_calories.toFixed(1) : 'N/A'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    container.appendChild(intensityEl);
+}
+        }
+            // Intensity distribution
+        //     if (data.intensity && data.intensity.length > 0) {
+        //         const intensityEl = document.createElement('div');
+        //         intensityEl.className = 'mt-4';
+        //         intensityEl.innerHTML = `
+        //             <h6>Intensity Distribution</h6>
+        //             <div class="table-responsive">
+        //                 <table class="table table-striped">
+        //                     <thead>
+        //                         <tr>
+        //                             <th>Intensity</th>
+        //                             <th>Workouts</th>
+        //                             <th>Avg Duration</th>
+        //                             <th>Avg Calories</th>
+        //                         </tr>
+        //                     </thead>
+        //                     <tbody>
+        //                         ${data.intensity.map(item => `
+        //                             <tr>
+        //                                 <td>${item.intensity}</td>
+        //                                 <td>${item.count}</td>
+        //                                 <td>${item.avg_duration.toFixed(1)} min</td>
+        //                                 <td>${item.avg_calories.toFixed(1)}</td>
+        //                             </tr>
+        //                         `).join('')}
+        //                     </tbody>
+        //                 </table>
+        //             </div>
+        //         `;
+        //         container.appendChild(intensityEl);
+        //     }
+        // }
+
+        // Analyze Uploaded File
+        async function analyzeFile() {
+            const fileInput = document.getElementById('fileUpload');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const btn = document.getElementById('analyzeFileBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('fileAnalysis').innerHTML = data.analysis || 'No analysis available';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to analyze file');
+                }
+            } catch (error) {
+                document.getElementById('fileAnalysis').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Export Data
+        async function exportData(format) {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/export?format=${format}`);
+                if (!response.ok) {
+                    throw new Error('Failed to export data');
+                }
+
+                if (format === 'json') {
+                    const data = await response.json();
+                    downloadFile(JSON.stringify(data, null, 2), `fitness_data_${currentUserId}.json`, 'application/json');
+                } else {
+                    const blob = await response.blob();
+                    const extension = format === 'csv' ? 'csv' : 'xlsx';
+                    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    const url = URL.createObjectURL(blob);
+                    downloadFile(url, `fitness_data_${currentUserId}.${extension}`, mimeType);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        // Helper function to download files
+        function downloadFile(content, filename, mimeType) {
+            const a = document.createElement('a');
+            if (typeof content === 'string' && !content.startsWith('blob:')) {
+                const blob = new Blob([content], { type: mimeType });
+                content = URL.createObjectURL(blob);
+            }
+            a.href = content;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

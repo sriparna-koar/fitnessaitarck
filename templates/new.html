@@ -1,0 +1,1306 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fitness Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .ai-response {
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .dashboard-card {
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">AI Fitness Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="dashboard-tab">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="workouts-tab">Workouts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="goals-tab">Goals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="ai-tab">AI Assistant</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="dashboard-view">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card text-white bg-success h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Workouts</h5>
+                            <p class="card-text display-4" id="total-workouts">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card text-white bg-info h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Calories Burned</h5>
+                            <p class="card-text display-4" id="total-calories">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card text-white bg-warning h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Active Goals</h5>
+                            <p class="card-text display-4" id="active-goals">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>AI Recommendations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recommendations" class="ai-response">
+                                Click "Get Recommendations" to generate personalized workout suggestions.
+                            </div>
+                            <button id="get-recommendations" class="btn btn-primary mt-3">Get Recommendations</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Data Import/Export</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="upload-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="file-upload" class="form-label">Upload Fitness Data</label>
+                                    <input class="form-control" type="file" id="file-upload" accept=".csv,.json,.xlsx">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Upload & Analyze</button>
+                            </form>
+                            <hr>
+                            <h6>Export Data</h6>
+                            <div class="btn-group mt-2">
+                                <a href="#" class="btn btn-outline-secondary export-btn" data-format="json">JSON</a>
+                                <a href="#" class="btn btn-outline-secondary export-btn" data-format="csv">CSV</a>
+                                <a href="#" class="btn btn-outline-secondary export-btn" data-format="excel">Excel</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="workouts-view" style="display: none;">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Log New Workout</h5>
+                </div>
+                <div class="card-body">
+                    <form id="workout-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="workout-type" class="form-label">Workout Type</label>
+                                    <select class="form-select" id="workout-type" required>
+                                        <option value="">Select type</option>
+                                        <option value="Running">Running</option>
+                                        <option value="Cycling">Cycling</option>
+                                        <option value="Swimming">Swimming</option>
+                                        <option value="Weight Training">Weight Training</option>
+                                        <option value="Yoga">Yoga</option>
+                                        <option value="HIIT">HIIT</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">Duration (minutes)</label>
+                                    <input type="number" class="form-control" id="duration" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="calories" class="form-label">Calories Burned</label>
+                                    <input type="number" class="form-control" id="calories" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="intensity" class="form-label">Intensity</label>
+                                    <select class="form-select" id="intensity" required>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="workout-notes" class="form-label">Notes</label>
+                                    <textarea class="form-control" id="workout-notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Log Workout</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Workout History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Calories</th>
+                                    <th>Intensity</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workout-history">
+                              
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="goals-view" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Set New Goal</h5>
+                </div>
+                <div class="card-body">
+                    <form id="goal-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="goal-type" class="form-label">Goal Type</label>
+                                    <select class="form-select" id="goal-type" required>
+                                        <option value="">Select type</option>
+                                        <option value="Weight Loss">Weight Loss</option>
+                                        <option value="Muscle Gain">Muscle Gain</option>
+                                        <option value="Endurance">Endurance</option>
+                                        <option value="Flexibility">Flexibility</option>
+                                        <option value="Workout Frequency">Workout Frequency</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="target-value" class="form-label">Target Value</label>
+                                    <input type="text" class="form-control" id="target-value" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="target-date" class="form-label">Target Date</label>
+                                    <input type="date" class="form-control" id="target-date" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Set Goal</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Your Goals</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Goal</th>
+                                    <th>Target</th>
+                                    <th>Progress</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="goals-list">
+                            
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-view" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5>AI Fitness Assistant</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="ai-prompt" class="form-label">Ask me anything about fitness, nutrition, or health:</label>
+                        <textarea class="form-control" id="ai-prompt" rows="3" placeholder="E.g., 'Create a weekly workout plan for beginners'"></textarea>
+                    </div>
+                    <button id="ask-ai" class="btn btn-primary">Ask AI</button>
+                    <div id="ai-response" class="ai-response mt-3">
+                        Your AI-generated response will appear here.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        const userId = "user_123"; // In a real app, this would come from authentication
+        let userData = {};
+
+        // DOM elements
+        const views = {
+            dashboard: document.getElementById('dashboard-view'),
+            workouts: document.getElementById('workouts-view'),
+            goals: document.getElementById('goals-view'),
+            ai: document.getElementById('ai-view')
+        };
+
+        const tabLinks = {
+            dashboard: document.getElementById('dashboard-tab'),
+            workouts: document.getElementById('workouts-tab'),
+            goals: document.getElementById('goals-tab'),
+            ai: document.getElementById('ai-tab')
+        };
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab navigation
+            for (const [tabName, tabLink] of Object.entries(tabLinks)) {
+                tabLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView(tabName);
+                });
+            }
+
+            // Show dashboard by default
+            showView('dashboard');
+
+            // Initialize user (in a real app, this would be done after login)
+            initializeUser();
+
+            // Set up form submissions
+            document.getElementById('workout-form').addEventListener('submit', logWorkout);
+            document.getElementById('goal-form').addEventListener('submit', setGoal);
+            document.getElementById('upload-form').addEventListener('submit', uploadFile);
+            document.getElementById('get-recommendations').addEventListener('click', getRecommendations);
+            document.getElementById('ask-ai').addEventListener('click', askAI);
+
+            // Set up export buttons
+            document.querySelectorAll('.export-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const format = this.getAttribute('data-format');
+                    exportData(format);
+                });
+            });
+        });
+
+        function showView(viewName) {
+            // Hide all views
+            for (const view of Object.values(views)) {
+                view.style.display = 'none';
+            }
+
+            // Remove active class from all tabs
+            for (const tab of Object.values(tabLinks)) {
+                tab.classList.remove('active');
+            }
+
+            // Show selected view and mark tab as active
+            views[viewName].style.display = 'block';
+            tabLinks[viewName].classList.add('active');
+
+            // Refresh data if needed
+            if (viewName === 'workouts') {
+                fetchWorkouts();
+            } else if (viewName === 'goals') {
+                fetchGoals();
+            } else if (viewName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        function initializeUser() {
+            // In a real app, this would come from your authentication system
+            const user = {
+                user_id: userId,
+                name: "John Doe",
+                age: 30,
+                weight: 75,
+                height: 175,
+                fitness_level: "Intermediate"
+            };
+
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('User initialized:', data);
+                updateDashboard();
+            })
+            .catch(error => {
+                console.error('Error initializing user:', error);
+            });
+        }
+
+        function updateDashboard() {
+            fetch(`/api/users/${userId}/stats`)
+            .then(response => response.json())
+            .then(data => {
+                userData = data;
+                document.getElementById('total-workouts').textContent = data.total_workouts;
+                document.getElementById('total-calories').textContent = data.total_calories;
+                document.getElementById('active-goals').textContent = data.active_goals;
+            })
+            .catch(error => {
+                console.error('Error fetching stats:', error);
+            });
+        }
+
+        function logWorkout(e) {
+            e.preventDefault();
+            
+            const workoutData = {
+                workout_type: document.getElementById('workout-type').value,
+                duration: document.getElementById('duration').value,
+                calories: document.getElementById('calories').value,
+                intensity: document.getElementById('intensity').value,
+                notes: document.getElementById('workout-notes').value
+            };
+
+            fetch(`/api/users/${userId}/workouts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(workoutData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Workout logged successfully!');
+                document.getElementById('workout-form').reset();
+                fetchWorkouts();
+                updateDashboard();
+            })
+            .catch(error => {
+                console.error('Error logging workout:', error);
+                alert('Failed to log workout');
+            });
+        }
+
+     
+        function setGoal(e) {
+            e.preventDefault();
+            
+            const goalData = {
+                goal_type: document.getElementById('goal-type').value,
+                target_value: document.getElementById('target-value').value,
+                target_date: document.getElementById('target-date').value
+            };
+
+            fetch(`/api/users/${userId}/goals`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(goalData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Goal set successfully!');
+                document.getElementById('goal-form').reset();
+                fetchGoals();
+                updateDashboard();
+            })
+            .catch(error => {
+                console.error('Error setting goal:', error);
+                alert('Failed to set goal');
+            });
+        }
+function fetchWorkouts() {
+    fetch(`/api/users/${userId}/stats`)
+    .then(response => response.json())
+    .then(data => {
+        const workouts = data.workouts || [];
+        const tbody = document.getElementById('workout-history');
+        tbody.innerHTML = '';
+
+        workouts.forEach(workout => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date(workout.timestamp).toLocaleDateString()}</td>
+                <td>${workout.type}</td>
+                <td>${workout.duration} min</td>
+                <td>${workout.calories}</td>
+                <td>${workout.intensity}</td>
+                <td>${workout.notes || ''}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching workouts:', error);
+    });
+}
+
+function fetchGoals() {
+    fetch(`/api/users/${userId}/stats`)
+    .then(response => response.json())
+    .then(data => {
+        const goals = data.goals || [];
+        const tbody = document.getElementById('goals-list');
+        tbody.innerHTML = '';
+
+        goals.forEach(goal => {
+            const progress = goal.current_value / goal.target_value * 100;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${goal.type}</td>
+                <td>${goal.target_value}</td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: ${progress}%"></div>
+                    </div>
+                </td>
+                <td>${new Date(goal.target_date).toLocaleDateString()}</td>
+                <td>${goal.completed ? 'Completed' : 'In Progress'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching goals:', error);
+    });
+}
+      
+        function getRecommendations() {
+            fetch(`/api/users/${userId}/recommendations`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('recommendations').innerHTML = data.recommendation;
+            })
+            .catch(error => {
+                console.error('Error getting recommendations:', error);
+                document.getElementById('recommendations').textContent = 'Failed to get recommendations.';
+            });
+        }
+
+        function askAI() {
+            const prompt = document.getElementById('ai-prompt').value;
+            if (!prompt.trim()) {
+                alert('Please enter a question');
+                return;
+            }
+
+            fetch('/api/ai/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('ai-response').textContent = `Error: ${data.error}`;
+                } else {
+                    document.getElementById('ai-response').innerHTML = data.response;
+                }
+            })
+            .catch(error => {
+                console.error('Error asking AI:', error);
+                document.getElementById('ai-response').textContent = 'Failed to get AI response.';
+            });
+        }
+
+        function uploadFile(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file-upload');
+            if (!fileInput.files.length) {
+                alert('Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('File processed successfully!');
+                    console.log('Analysis:', data.analysis);
+                    console.log('Data preview:', data.data_preview);
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
+                alert('Failed to upload file');
+            });
+        }
+
+        function exportData(format) {
+            window.location.href = `/api/users/${userId}/export?format=${format}`;
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .workout-item, .goal-item {
+            border-left: 4px solid #0d6efd;
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        .sentiment-positive {
+            color: #28a745;
+        }
+        .sentiment-negative {
+            color: #dc3545;
+        }
+        .sentiment-neutral {
+            color: #6c757d;
+        }
+        #recommendations {
+            white-space: pre-line;
+        }
+        #fileAnalysis {
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center"><i class="bi bi-activity"></i> Fitness Tracker</h1>
+            </div>
+        </div>
+
+        <div class="row">
+          
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">User Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="userForm">
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">User ID</label>
+                                <input type="text" class="form-control" id="userId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="userName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="userName" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="userAge" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="userAge" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="userWeight" class="form-label">Weight (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" id="userWeight" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="userHeight" class="form-label">Height (cm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="userHeight" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="userFitnessLevel" class="form-label">Fitness Level</label>
+                                    <select class="form-select" id="userFitnessLevel" required>
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Save Profile</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="quickStats">
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="totalWorkouts">0</div>
+                                    <div class="stat-label">Workouts</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="totalCalories">0</div>
+                                    <div class="stat-label">Calories</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="activeGoals">0</div>
+                                    <div class="stat-label">Active Goals</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card bg-light">
+                                    <div class="stat-value" id="completedGoals">0</div>
+                                    <div class="stat-label">Completed Goals</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="workouts-tab" data-bs-toggle="tab" data-bs-target="#workouts" type="button" role="tab">Workouts</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab">Goals</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai" type="button" role="tab">AI Features</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="mainTabsContent">
+                   
+                    <div class="tab-pane fade show active" id="workouts" role="tabpanel">
+                        <div class="mb-4">
+                            <h5>Log New Workout</h5>
+                            <form id="workoutForm">
+                                <input type="hidden" id="workoutUserId">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutType" class="form-label">Type</label>
+                                        <select class="form-select" id="workoutType" required>
+                                            <option value="Running">Running</option>
+                                            <option value="Cycling">Cycling</option>
+                                            <option value="Swimming">Swimming</option>
+                                            <option value="Weight Training">Weight Training</option>
+                                            <option value="Yoga">Yoga</option>
+                                            <option value="HIIT">HIIT</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutDuration" class="form-label">Duration (min)</label>
+                                        <input type="number" class="form-control" id="workoutDuration" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="workoutCalories" class="form-label">Calories</label>
+                                        <input type="number" class="form-control" id="workoutCalories" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workoutIntensity" class="form-label">Intensity</label>
+                                        <select class="form-select" id="workoutIntensity" required>
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workoutSentiment" class="form-label">Mood After Workout</label>
+                                        <select class="form-select" id="workoutSentiment">
+                                            <option value="">Select mood (optional)</option>
+                                            <option value="POSITIVE">Positive</option>
+                                            <option value="NEGATIVE">Negative</option>
+                                            <option value="NEUTRAL">Neutral</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="workoutNotes" class="form-label">Notes</label>
+                                    <textarea class="form-control" id="workoutNotes" rows="2"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Log Workout</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h5>Recent Workouts</h5>
+                            <div id="workoutsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Goals Tab -->
+                    <div class="tab-pane fade" id="goals" role="tabpanel">
+                        <div class="mb-4">
+                            <h5>Set New Goal</h5>
+                            <form id="goalForm">
+                                <input type="hidden" id="goalUserId">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="goalType" class="form-label">Goal Type</label>
+                                        <select class="form-select" id="goalType" required>
+                                            <option value="Weight Loss">Weight Loss</option>
+                                            <option value="Muscle Gain">Muscle Gain</option>
+                                            <option value="Endurance">Endurance</option>
+                                            <option value="Flexibility">Flexibility</option>
+                                            <option value="Workout Frequency">Workout Frequency</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="goalTargetValue" class="form-label">Target Value</label>
+                                        <input type="number" step="0.1" class="form-control" id="goalTargetValue" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="goalTargetDate" class="form-label">Target Date</label>
+                                    <input type="date" class="form-control" id="goalTargetDate" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Set Goal</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h5>Your Goals</h5>
+                            <div id="goalsList"></div>
+                        </div>
+                    </div>
+
+               
+                    <div class="tab-pane fade" id="ai" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Workout Recommendations</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Get personalized workout recommendations based on your profile and history.</p>
+                                        <button id="getRecommendationsBtn" class="btn btn-primary mb-3">Get Recommendations</button>
+                                        <div id="recommendations" class="p-2 bg-light rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">AI Chat</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="aiPrompt" class="form-label">Ask about fitness, nutrition, or health:</label>
+                                            <textarea class="form-control" id="aiPrompt" rows="2" placeholder="E.g., What's a good meal plan for muscle gain?"></textarea>
+                                        </div>
+                                        <button id="askAiBtn" class="btn btn-primary mb-3">Ask AI</button>
+                                        <div id="aiResponse" class="p-2 bg-light rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Data Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="fileUpload" class="form-label">Upload fitness data (CSV, JSON, Excel)</label>
+                                    <input class="form-control" type="file" id="fileUpload" accept=".csv,.json,.xlsx,.xls">
+                                </div>
+                                <button id="analyzeFileBtn" class="btn btn-primary mb-3">Analyze File</button>
+                                <div id="fileAnalysis" class="p-2 bg-light rounded"></div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h5>Export Your Data</h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary" id="exportJson">JSON</button>
+                                <button type="button" class="btn btn-outline-secondary" id="exportCsv">CSV</button>
+                                <button type="button" class="btn btn-outline-secondary" id="exportExcel">Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+  
+        let currentUserId = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+            document.getElementById('workoutForm').addEventListener('submit', handleWorkoutSubmit);
+            document.getElementById('goalForm').addEventListener('submit', handleGoalSubmit);
+            document.getElementById('getRecommendationsBtn').addEventListener('click', getRecommendations);
+            document.getElementById('askAiBtn').addEventListener('click', askAI);
+            document.getElementById('analyzeFileBtn').addEventListener('click', analyzeFile);
+            document.getElementById('exportJson').addEventListener('click', () => exportData('json'));
+            document.getElementById('exportCsv').addEventListener('click', () => exportData('csv'));
+            document.getElementById('exportExcel').addEventListener('click', () => exportData('excel'));
+
+            const savedUserId = localStorage.getItem('fitnessTrackerUserId');
+            if (savedUserId) {
+                loadUserData(savedUserId);
+            }
+        });
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
+            const age = document.getElementById('userAge').value;
+            const weight = document.getElementById('userWeight').value;
+            const height = document.getElementById('userHeight').value;
+            const fitnessLevel = document.getElementById('userFitnessLevel').value;
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        name: name,
+                        age: age,
+                        weight: weight,
+                        height: height,
+                        fitness_level: fitnessLevel
+                    })
+                });
+
+                if (response.ok) {
+                    alert('User profile saved successfully!');
+                    currentUserId = userId;
+                    localStorage.setItem('fitnessTrackerUserId', userId);
+                    document.getElementById('workoutUserId').value = userId;
+                    document.getElementById('goalUserId').value = userId;
+                    loadUserData(userId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to save user profile');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        async function handleWorkoutSubmit(e) {
+            e.preventDefault();
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const workoutType = document.getElementById('workoutType').value;
+            const duration = document.getElementById('workoutDuration').value;
+            const calories = document.getElementById('workoutCalories').value;
+            const intensity = document.getElementById('workoutIntensity').value;
+            const notes = document.getElementById('workoutNotes').value;
+            const sentiment = document.getElementById('workoutSentiment').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/workouts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workout_type: workoutType,
+                        duration: duration,
+                        calories: calories,
+                        intensity: intensity,
+                        notes: notes,
+                        sentiment: sentiment
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Workout logged successfully!');
+                    if (result.sentiment) {
+                        alert(`Workout sentiment: ${result.sentiment.toLowerCase()}`);
+                    }
+                    document.getElementById('workoutForm').reset();
+                    loadUserData(currentUserId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to log workout');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        async function handleGoalSubmit(e) {
+            e.preventDefault();
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            const goalType = document.getElementById('goalType').value;
+            const targetValue = document.getElementById('goalTargetValue').value;
+            const targetDate = document.getElementById('goalTargetDate').value;
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/goals`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        goal_type: goalType,
+                        target_value: targetValue,
+                        target_date: targetDate
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Goal set successfully!');
+                    document.getElementById('goalForm').reset();
+                    loadUserData(currentUserId);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to set goal');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error('Error:', error);
+            }
+        }
+
+      
+        async function loadUserData(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}/stats`);
+                if (!response.ok) {
+                    throw new Error('Failed to load user data');
+                }
+
+                const data = await response.json();
+
+                document.getElementById('totalWorkouts').textContent = data.total_workouts;
+                document.getElementById('totalCalories').textContent = data.total_calories;
+                document.getElementById('activeGoals').textContent = data.active_goals;
+                document.getElementById('completedGoals').textContent = data.completed_goals;
+
+                // Populate user form
+                const user = data.user_info;
+                document.getElementById('userId').value = user.user_id;
+                document.getElementById('userName').value = user.name;
+                document.getElementById('userAge').value = user.age;
+                document.getElementById('userWeight').value = user.weight;
+                document.getElementById('userHeight').value = user.height;
+                document.getElementById('userFitnessLevel').value = user.fitness_level;
+                document.getElementById('workoutUserId').value = user.user_id;
+                document.getElementById('goalUserId').value = user.user_id;
+
+                // Render workouts list
+                renderWorkouts(data.workouts);
+
+                // Render goals list
+                renderGoals(data.goals);
+
+                currentUserId = userId;
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+
+        function renderWorkouts(workouts) {
+            const container = document.getElementById('workoutsList');
+            container.innerHTML = '';
+
+            if (workouts.length === 0) {
+                container.innerHTML = '<p>No workouts logged yet.</p>';
+                return;
+            }
+
+            workouts.forEach(workout => {
+                const workoutEl = document.createElement('div');
+                workoutEl.className = 'workout-item';
+                workoutEl.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <h6>${workout.workout_type} (${workout.duration} min)</h6>
+                        <small class="text-muted">${new Date(workout.timestamp).toLocaleString()}</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="badge bg-${workout.intensity.toLowerCase() === 'high' ? 'danger' : workout.intensity.toLowerCase() === 'medium' ? 'warning' : 'success'}">
+                                ${workout.intensity}
+                            </span>
+                            <span>${workout.calories} calories</span>
+                        </div>
+                        ${workout.notes ? `<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#notes-${workout.id}">Notes</button>` : ''}
+                    </div>
+                    ${workout.notes ? `
+                    <div class="collapse mt-2" id="notes-${workout.id}">
+                        <div class="card card-body">
+                            ${workout.notes}
+                        </div>
+                    </div>` : ''}
+                `;
+                container.appendChild(workoutEl);
+            });
+        }
+
+        // Render Goals List
+        function renderGoals(goals) {
+            const container = document.getElementById('goalsList');
+            container.innerHTML = '';
+
+            if (goals.length === 0) {
+                container.innerHTML = '<p>No goals set yet.</p>';
+                return;
+            }
+
+            goals.forEach(goal => {
+                const progress = goal.current_value / goal.target_value * 100;
+                const goalEl = document.createElement('div');
+                goalEl.className = 'goal-item mb-3';
+                goalEl.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <h6>${goal.goal_type}</h6>
+                        <small class="text-muted">Target: ${new Date(goal.target_date).toLocaleDateString()}</small>
+                    </div>
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: ${Math.min(progress, 100)}%;" 
+                            aria-valuenow="${goal.current_value}" aria-valuemin="0" aria-valuemax="${goal.target_value}">
+                            ${Math.round(progress)}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>${goal.current_value} of ${goal.target_value}</span>
+                        <span class="badge bg-${goal.completed ? 'success' : 'primary'}">
+                            ${goal.completed ? 'Completed' : 'Active'}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(goalEl);
+            });
+        }
+
+        // Get Workout Recommendations
+        async function getRecommendations() {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/recommendations`);
+                if (!response.ok) {
+                    throw new Error('Failed to get recommendations');
+                }
+
+                const data = await response.json();
+                document.getElementById('recommendations').innerHTML = data.recommendation;
+            } catch (error) {
+                document.getElementById('recommendations').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+
+      
+        async function askAI() {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt) {
+                alert('Please enter a question');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/ai/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('aiResponse').innerHTML = data.response;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to get AI response');
+                }
+            } catch (error) {
+                document.getElementById('aiResponse').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+
+
+        async function analyzeFile() {
+            const fileInput = document.getElementById('fileUpload');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('fileAnalysis').innerHTML = data.analysis;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to analyze file');
+                }
+            } catch (error) {
+                document.getElementById('fileAnalysis').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+
+        // Export Data
+        async function exportData(format) {
+            if (!currentUserId) {
+                alert('Please create or load a user profile first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${currentUserId}/export?format=${format}`);
+                if (!response.ok) {
+                    throw new Error('Failed to export data');
+                }
+
+                if (format === 'json') {
+                    const data = await response.json();
+                    downloadFile(JSON.stringify(data, null, 2), `fitness_data_${currentUserId}.json`, 'application/json');
+                } else {
+                    const blob = await response.blob();
+                    const extension = format === 'csv' ? 'csv' : 'xlsx';
+                    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    const url = URL.createObjectURL(blob);
+                    downloadFile(url, `fitness_data_${currentUserId}.${extension}`, mimeType);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        // Helper function to download files
+        function downloadFile(content, filename, mimeType) {
+            const a = document.createElement('a');
+            if (typeof content === 'string' && !content.startsWith('blob:')) {
+                const blob = new Blob([content], { type: mimeType });
+                content = URL.createObjectURL(blob);
+            }
+            a.href = content;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "user_id": "123",
+  "name": "Banani Koar",
+  "age": 52,
+  "gender": "Female",
+  "weight_kg": 72,
+  "height_cm": 178,
+  "bmi": 22.7,
+  "goal": "Weight Loss",
+  "daily_summary": [
+    {
+      "date": "2025-07-03",
+      "steps": 8450,
+      "calories_burned": 460,
+      "distance_km": 6.7,
+      "active_minutes": 52,
+      "water_intake_liters": 2.1,
+      "sleep_hours": 7.2
+    },
+    {
+      "date": "2025-07-02",
+      "steps": 10200,
+      "calories_burned": 520,
+      "distance_km": 8.0,
+      "active_minutes": 68,
+      "water_intake_liters": 2.4,
+      "sleep_hours": 6.8
+    }
+  ],
+  "diet_log": [
+    {
+      "date": "2025-07-03",
+      "meals": [
+        {
+          "type": "Breakfast",
+          "items": [
+            "Oatmeal",
+            "Banana",
+            "Green Tea"
+          ],
+          "calories": 320
+        },
+        {
+          "type": "Lunch",
+          "items": [
+            "Grilled Chicken",
+            "Quinoa",
+            "Steamed Broccoli"
+          ],
+          "calories": 550
+        },
+        {
+          "type": "Dinner",
+          "items": [
+            "Salmon",
+            "Sweet Potato",
+            "Spinach Salad"
+          ],
+          "calories": 580
+        }
+      ]
+    }
+  ],
+  "exercise_log": [
+    {
+      "date": "2025-07-03",
+      "workout_type": "Cardio",
+      "duration_minutes": 40,
+      "calories_burned": 410,
+      "notes": "Treadmill + Jump Rope"
+    },
+    {
+      "date": "2025-07-02",
+      "workout_type": "Strength Training",
+      "duration_minutes": 50,
+      "calories_burned": 480,
+      "notes": "Upper body + core focus"
+    }
+  ]
+}
